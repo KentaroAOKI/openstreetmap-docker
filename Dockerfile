@@ -1,10 +1,10 @@
 # OpenStreetMap https://switch2osm.org/serving-tiles/manually-building-a-tile-server-18-04-lts/
 FROM ubuntu:18.04
 # postgresql connection settings
-ENV PSQL_HOST=
+ENV PSQL_HOST=localhost
 ENV PSQL_PORT=5432
-ENV PSQL_USERNAME=
-ENV PSQL_PASSWORD=
+ENV PSQL_USERNAME=postgres
+ENV PSQL_PASSWORD=postgrespassword
 ENV PSQL_DBNAME=gis
 # Installing packages
 ENV DEBIAN_FRONTEND=noninteractive
@@ -47,8 +47,8 @@ RUN cd openstreetmap-carto && npm install -g carto && carto -v
 # RUN cd openstreetmap-carto && carto project.mml > mapnik.xml
 # Loading data
 RUN mkdir data
-#RUN cd data && wget https://download.geofabrik.de/asia/japan-latest.osm.pbf
-#RUN osm2pgsql -d $PSQL_DBNAME --username $PSQL_USERNAME --host $PSQL_HOST --port $PSQL_PORT --create --slim -G --hstore --tag-transform-script openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 1 -S openstreetmap-carto/openstreetmap-carto.style data/japan-latest.osm.pbf
+# RUN cd data && wget https://download.geofabrik.de/asia/japan-latest.osm.pbf
+# RUN osm2pgsql -d $PSQL_DBNAME --username $PSQL_USERNAME --host $PSQL_HOST --port $PSQL_PORT --create --slim -G --hstore --tag-transform-script openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 1 -S openstreetmap-carto/openstreetmap-carto.style data/japan-latest.osm.pbf
 # Loading data - Shapefile download
 RUN apt install -y python-yaml python-requests python-psycopg2
 RUN apt install -y python3-yaml python3-requests python3-psycopg2
@@ -66,7 +66,10 @@ RUN echo LoadModule tile_module /usr/lib/apache2/modules/mod_tile.so > /etc/apac
 RUN a2enconf mod_tile
 RUN sed -e 's/DocumentRoot \/var\/www\/html/LoadTileConfigFile \/usr\/local\/etc\/renderd.conf\n\tModTileRenderdSocketName \/var\/run\/renderd\/renderd.sock\n\tModTileRequestTimeout 0\n\tModTileMissingRequestTimeout 60\n\tDocumentRoot \/var\/www\/html/' /etc/apache2/sites-available/000-default.conf > /tmp/000-default.conf
 RUN cp /tmp/000-default.conf /etc/apache2/sites-available/000-default.conf
-RUN sed 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/
+RUN sed -e 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/sample_leaflet.html
+RUN apt install -y sudo
 COPY scripts scripts
-#RUN service apache2 start
-#RUN renderd -f -c /usr/local/etc/renderd.conf
+# RUN sh scripts/create_database.sh
+# RUN sh scripts/build_osm_data.sh
+# RUN service apache2 start
+# RUN renderd -f -c /usr/local/etc/renderd.conf
