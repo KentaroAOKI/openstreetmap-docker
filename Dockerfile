@@ -67,9 +67,6 @@ RUN a2enconf mod_tile
 RUN sed -e 's/DocumentRoot \/var\/www\/html/LoadTileConfigFile \/usr\/local\/etc\/renderd.conf\n\tModTileRenderdSocketName \/var\/run\/renderd\/renderd.sock\n\tModTileRequestTimeout 0\n\tModTileMissingRequestTimeout 60\n\tDocumentRoot \/var\/www\/html/' /etc/apache2/sites-available/000-default.conf > /tmp/000-default.conf
 RUN cp /tmp/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN sed 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/
-#RUN psql --host=$PSQL_HOST --port=$PSQL_PORT --username=$PSQL_USERNAME --dbname=postgres --password --file=psql/create-gis.sql
-#RUN cd data && wget https://download.geofabrik.de/asia/japan-latest.osm.pbf
-#RUN osm2pgsql -d $PSQL_DBNAME --username $PSQL_USERNAME --host $PSQL_HOST --port $PSQL_PORT --create --slim -G --hstore --tag-transform-script openstreetmap-carto/openstreetmap-carto.lua -C 2500 --number-processes 1 -S openstreetmap-carto/openstreetmap-carto.style data/japan-latest.osm.pbf
-#RUN cd openstreetmap-carto && carto project.mml > mapnik.xml
+COPY scripts scripts
 #RUN service apache2 start
 #RUN renderd -f -c /usr/local/etc/renderd.conf
