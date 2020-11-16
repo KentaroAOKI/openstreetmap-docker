@@ -1,7 +1,7 @@
 # OpenStreetMap https://switch2osm.org/serving-tiles/manually-building-a-tile-server-18-04-lts/
 FROM ubuntu:18.04
 # postgresql connection settings
-ENV PSQL_HOST=localhost
+ENV PSQL_HOST=postgresql
 ENV PSQL_PORT=5432
 ENV PSQL_USERNAME=postgres
 ENV PSQL_PASSWORD=postgrespassword
@@ -16,9 +16,9 @@ RUN apt install -y libboost-all-dev git-core tar unzip wget bzip2 build-essentia
 WORKDIR /opt
 # Installing postgresql / postgis
 RUN apt install -y postgresql postgresql-contrib postgis postgresql-10-postgis-2.4 postgresql-10-postgis-scripts
-RUN echo $PSQL_HOST:$PSQL_PORT:postgres:$PSQL_USERNAME:$PSQL_PASSWORD > ~/.pgpass
-RUN echo $PSQL_HOST:$PSQL_PORT:$PSQL_DBNAME:$PSQL_USERNAME:$PSQL_PASSWORD >> ~/.pgpass
-RUN chmod 600 ~/.pgpass
+# RUN echo $PSQL_HOST:$PSQL_PORT:postgres:$PSQL_USERNAME:$PSQL_PASSWORD > ~/.pgpass
+# RUN echo $PSQL_HOST:$PSQL_PORT:$PSQL_DBNAME:$PSQL_USERNAME:$PSQL_PASSWORD >> ~/.pgpass
+# RUN chmod 600 ~/.pgpass
 RUN mkdir psql
 COPY psql/create-gis.sql psql/
 # RUN psql --host=$PSQL_HOST --port=$PSQL_PORT --username=$PSQL_USERNAME --dbname=postgres --password --file=psql/create-gis.sql
@@ -32,7 +32,8 @@ RUN cd osm2pgsql && mkdir build && cd build && cmake .. && make && make install
 # Mapnik
 RUN apt-get install autoconf apache2-dev libtool libxml2-dev libbz2-dev libgeos-dev libgeos++-dev libproj-dev gdal-bin libmapnik-dev mapnik-utils python-mapnik python3-psycopg2
 # Install mod_tile and renderd
-RUN git clone -b switch2osm https://github.com/SomeoneElseOSM/mod_tile.git
+RUN git clone -b switch2osm https://github.com/SomeoneElseOSM/mod_tile.git \
+    && cd mod_tile && git checkout e25bfdba1c1f2103c69529f1a30b22a14ce311f1
 # RUN git clone https://github.com/openstreetmap/mod_tile.git \
 #     && cd mod_tile && git checkout a3f4230df6bc320b3b564ab20a29b57f787dbfe4
 RUN cd mod_tile && ./autogen.sh && ./configure && make && make install && make install-mod_tile && ldconfig
@@ -42,8 +43,8 @@ RUN apt install -y npm nodejs
 RUN git clone https://github.com/gravitystorm/openstreetmap-carto.git \
     && cd openstreetmap-carto && git checkout b10aef3866bacf387581b8fea4eec265010b0d14
 COPY openstreetmap-carto/project.mml.tmplate openstreetmap-carto/
-RUN sed -e 's/PSQL_HOST/'$PSQL_HOST'/' -e 's/PSQL_PORT/'$PSQL_PORT'/' -e 's/PSQL_USERNAME/'$PSQL_USERNAME'/' -e 's/PSQL_PASSWORD/'$PSQL_PASSWORD'/' -e 's/PSQL_DBNAME/'$PSQL_DBNAME'/' openstreetmap-carto/project.mml.tmplate > openstreetmap-carto/project.mml
 RUN cd openstreetmap-carto && npm install -g carto && carto -v
+# RUN sed -e 's/PSQL_HOST/'$PSQL_HOST'/' -e 's/PSQL_PORT/'$PSQL_PORT'/' -e 's/PSQL_USERNAME/'$PSQL_USERNAME'/' -e 's/PSQL_PASSWORD/'$PSQL_PASSWORD'/' -e 's/PSQL_DBNAME/'$PSQL_DBNAME'/' openstreetmap-carto/project.mml.tmplate > openstreetmap-carto/project.mml
 # RUN cd openstreetmap-carto && carto project.mml > mapnik.xml
 # Loading data
 RUN mkdir data
@@ -69,7 +70,3 @@ RUN cp /tmp/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -e 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/sample_leaflet.html
 RUN apt install -y sudo
 COPY scripts scripts
-# RUN sh scripts/create_database.sh
-# RUN sh scripts/build_osm_data.sh
-# RUN service apache2 start
-# RUN renderd -f -c /usr/local/etc/renderd.conf
