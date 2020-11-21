@@ -1,11 +1,12 @@
 # OpenStreetMap https://switch2osm.org/serving-tiles/manually-building-a-tile-server-18-04-lts/
 FROM ubuntu:18.04
 # postgresql connection settings
-ENV PSQL_HOST=postgresql
+ENV PSQL_HOST=localhost
 ENV PSQL_PORT=5432
 ENV PSQL_USERNAME=postgres
 ENV PSQL_PASSWORD=postgrespassword
 ENV PSQL_DBNAME=gis
+ENV PSQL_INITIALIZE=false
 # Installing packages
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update
@@ -33,7 +34,7 @@ RUN cd osm2pgsql && mkdir build && cd build && cmake .. && make && make install
 RUN apt-get install autoconf apache2-dev libtool libxml2-dev libbz2-dev libgeos-dev libgeos++-dev libproj-dev gdal-bin libmapnik-dev mapnik-utils python-mapnik python3-psycopg2
 # Install mod_tile and renderd
 RUN git clone -b switch2osm https://github.com/SomeoneElseOSM/mod_tile.git \
-    && cd mod_tile && git checkout e25bfdba1c1f2103c69529f1a30b22a14ce311f1
+    && cd mod_tile && git checkout aa3d8edd778220e8e701e56d8bc7f16286060520
 # RUN git clone https://github.com/openstreetmap/mod_tile.git \
 #     && cd mod_tile && git checkout a3f4230df6bc320b3b564ab20a29b57f787dbfe4
 RUN cd mod_tile && ./autogen.sh && ./configure && make && make install && make install-mod_tile && ldconfig
@@ -70,3 +71,8 @@ RUN cp /tmp/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -e 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/sample_leaflet.html
 RUN apt install -y sudo
 COPY scripts scripts
+RUN chmod 700 scripts/*
+RUN /opt/scripts/01_initialize_database.sh
+RUN /opt/scripts/02_write_osm.sh
+RUN /opt/scripts/03_write_external.sh
+CMD [ "/opt/scripts/05_run_osmtile.sh" ]

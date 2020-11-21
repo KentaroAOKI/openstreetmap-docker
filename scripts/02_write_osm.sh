@@ -1,6 +1,6 @@
 #!/bin/sh
 # https://download.geofabrik.de/index.html
-osm_datas="asia/japan-latest.osm.pbf"
+osm_datas="antarctica-latest.osm.pbf"
 
 if test $PSQL_HOST = 'localhost'
 then
@@ -24,9 +24,6 @@ osm2pgsql -d $PSQL_DBNAME --username $PSQL_USERNAME --host $PSQL_HOST --port $PS
 fi
 rm /opt/data/$FILE
 done
-
-cd /opt/openstreetmap-carto
-python3 scripts/get-external-data.py --host $PSQL_HOST --port $PSQL_PORT --username $PSQL_USERNAME --password $PSQL_PASSWORD --database $PSQL_DBNAME
 
 if test $PSQL_HOST = 'localhost'
 then
