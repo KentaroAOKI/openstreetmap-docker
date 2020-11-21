@@ -6,7 +6,6 @@ ENV PSQL_PORT=5432
 ENV PSQL_USERNAME=postgres
 ENV PSQL_PASSWORD=postgrespassword
 ENV PSQL_DBNAME=gis
-ENV PSQL_INITIALIZE=false
 # Installing packages
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt update

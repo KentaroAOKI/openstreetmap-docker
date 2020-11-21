@@ -1,11 +1,6 @@
 #!/bin/bash
 
-if test $PSQL_INITIALIZE = 'true'; then
-  /opt/scripts/01_initialize_database.sh
-  # /opt/scripts/02_write_osm.sh
-  /opt/scripts/03_write_external.sh
-else
-
+# Update the PostgreSQL connection information.
 /opt/scripts/04_make_mapnik.sh
 
 # Start the postgresql process

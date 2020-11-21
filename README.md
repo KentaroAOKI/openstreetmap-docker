@@ -58,3 +58,6 @@ If you use PostgreSQL on the host, you may start it as follows.
 ```
 docker run -d -p 80:80 --add-host postgresql:`ifconfig eth0 | grep "inet " | awk '{print $2}'` -e PSQL_HOST=postgresql -v /home/user/mod_tile:/var/lib/mod_tile openstreetmaptile
 ```
+
+## How to speed up the startup of the OpenStreetMap tile server.
+In this Docker image, the startup script is created assuming that the PostgreSQL connection information will be changed. If the PostgreSQL connection information does not change, change the Dockerfile to run "scripts/04_make_mapnik.sh" when building the Docker image. Change the PostgreSQL connection information in the Dockerfile as well. And then, Please comment out "/opt/scripts/04_make_mapnik.sh" from "scripts/05_make_mapnik.sh".
