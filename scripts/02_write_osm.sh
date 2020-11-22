@@ -1,4 +1,9 @@
-#!/bin/sh
+#!/bin/sh -x
+
+echo $PSQL_HOST:$PSQL_PORT:postgres:$PSQL_USERNAME:$PSQL_PASSWORD > ~/.pgpass
+echo $PSQL_HOST:$PSQL_PORT:$PSQL_DBNAME:$PSQL_USERNAME:$PSQL_PASSWORD >> ~/.pgpass
+chmod 600 ~/.pgpass
+
 # https://download.geofabrik.de/index.html
 osm_datas="antarctica-latest.osm.pbf"
 

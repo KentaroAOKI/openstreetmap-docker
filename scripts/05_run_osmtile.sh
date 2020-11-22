@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # Update the PostgreSQL connection information.
+echo $PSQL_HOST:$PSQL_PORT:postgres:$PSQL_USERNAME:$PSQL_PASSWORD > ~/.pgpass
+echo $PSQL_HOST:$PSQL_PORT:$PSQL_DBNAME:$PSQL_USERNAME:$PSQL_PASSWORD >> ~/.pgpass
+chmod 600 ~/.pgpass
 /opt/scripts/04_make_mapnik.sh
 
 # Start the postgresql process
