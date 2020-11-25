@@ -64,8 +64,8 @@ RUN sed 's/\/home\/renderaccount\/src/\/opt/' /usr/local/etc/_renderd.conf > /us
 RUN mkdir /var/lib/mod_tile
 RUN mkdir /var/run/renderd && chmod 777 /var/run/renderd
 RUN echo LoadModule tile_module /usr/lib/apache2/modules/mod_tile.so > /etc/apache2/conf-available/mod_tile.conf
-RUN a2enconf mod_tile
-RUN sed -e 's/DocumentRoot \/var\/www\/html/LoadTileConfigFile \/usr\/local\/etc\/renderd.conf\n\tModTileRenderdSocketName \/var\/run\/renderd\/renderd.sock\n\tModTileRequestTimeout 0\n\tModTileMissingRequestTimeout 60\n\tDocumentRoot \/var\/www\/html/' /etc/apache2/sites-available/000-default.conf > /tmp/000-default.conf
+RUN a2enconf mod_tile && a2enmod headers
+RUN sed -e 's/DocumentRoot \/var\/www\/html/LoadTileConfigFile \/usr\/local\/etc\/renderd.conf\n\tModTileRenderdSocketName \/var\/run\/renderd\/renderd.sock\n\tModTileRequestTimeout 0\n\tModTileMissingRequestTimeout 60\n\tDocumentRoot \/var\/www\/html\n\tHeader set Access-Control-Allow-Origin \"*\"/' /etc/apache2/sites-available/000-default.conf > /tmp/000-default.conf
 RUN cp /tmp/000-default.conf /etc/apache2/sites-available/000-default.conf
 RUN sed -e 's/http:\/\/127.0.0.1//' mod_tile/extra/sample_leaflet.html > /var/www/html/sample_leaflet.html
 RUN apt install -y sudo
